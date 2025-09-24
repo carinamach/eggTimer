@@ -4,7 +4,7 @@ import './EggTimer.css';
 type EggType = 'soft' | 'medium' | 'hard';
 
 const EGG_TIMES: Record<EggType, number> = {
-  soft: 0.1 * 60, // 6 minutes
+  soft: 6 * 60, // 6 minutes
   medium: 8 * 60, // 8 minutes
   hard: 10 * 60, // 10 minutes
 };
