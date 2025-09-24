@@ -4,17 +4,26 @@ import './EggTimer.css';
 type EggType = 'soft' | 'medium' | 'hard';
 
 const EGG_TIMES: Record<EggType, number> = {
-  soft: 0.2 * 60, // 6 minutes
+  soft: 0.1 * 60, // 6 minutes
   medium: 8 * 60, // 8 minutes
   hard: 10 * 60, // 10 minutes
 };
 
 export const EggTimer = () => {
+  const alertSoundUrl = new URL('../assets/notification-bell.mp3', import.meta.url).href;
   const [selectedType, setSelectedType] = useState<EggType>('medium');
   const [timeLeft, setTimeLeft] = useState<number>(EGG_TIMES.medium);
   const [isRunning, setIsRunning] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const stopAlertSound = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.loop = false;
+      audioRef.current.currentTime = 0;
+    }
+  };
 
   const handleEggTypeChange = (type: EggType) => {
     console.log('Changing egg type to:', type);
@@ -23,6 +32,7 @@ export const EggTimer = () => {
     setTimeLeft(EGG_TIMES[type]);
     console.log('Time updated to:', EGG_TIMES[type]);
     setIsComplete(false);
+    stopAlertSound();
   };
 
   useEffect(() => {
@@ -35,7 +45,10 @@ export const EggTimer = () => {
     } else if (timeLeft === 0) {
       setIsRunning(false);
       setIsComplete(true);
-      audioRef.current?.play();
+      if (audioRef.current) {
+        audioRef.current.loop = true;
+        audioRef.current.play();
+      }
     }
 
     return () => {
@@ -44,6 +57,7 @@ export const EggTimer = () => {
   }, [isRunning, timeLeft]);
 
   const handleStart = () => {
+    stopAlertSound();
     setTimeLeft(EGG_TIMES[selectedType]);
     setIsRunning(true);
     setIsComplete(false);
@@ -51,12 +65,14 @@ export const EggTimer = () => {
 
   const handleStop = () => {
     setIsRunning(false);
+    stopAlertSound();
   };
 
   const handleReset = () => {
     setIsRunning(false);
     setIsComplete(false);
     setTimeLeft(EGG_TIMES[selectedType]);
+    stopAlertSound();
   };
 
   const formatTime = (seconds: number): string => {
@@ -125,7 +141,7 @@ export const EggTimer = () => {
 
       <audio
         ref={audioRef}
-        src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"
+        src={alertSoundUrl}
         preload="auto"
       />
     </div>
